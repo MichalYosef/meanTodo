@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>To do app</title>
+   
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.7/angular.min.js"></script>
+</head>
+
+<body ng-app="todoApp" ng-controller="todoCtrl">
+    <nav>
+        <div class="nav-wrapper container">
+            <a href="#" class="brand-logo">Todo App</a>
+            <ul class="right">
+                <li>
+                     <!-- Modal Trigger -->
+                    <a href="#createModal" class="modal-trigger"><i class="material-icons">add</i></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <ul class="collection withe-header">
+            <li class="collection-header"><h4>Todo Items</h4></li>
+            <li class="collection-item" ng-repeat="item in items">
+                <a href="#" class="secondary-content" ng-click="remove(item._id)"><i class="material-icons">delete</i></a>
+                {{item.description}}
+            </li>
+              
+        </ul>
+    </div>
+    <!-- Modal Structure -->
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <h4>New Item</h4>
+            <br>
+            <div class="input-field">
+                <input type="text" id="description" ng-model="description">
+                <label for="description">Description</label>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#" class="modal-action modal-close btn-flat" ng-click="create()">Create</a>
+        </div>
+    </div>
+            
+    
+  
+    <script type="text/javascript">
+
+        $(document).ready(function()
+        {
+            $('.modal').modal();
+        });
+
+        const app = angular.module('todoApp',[]);
+        app.controller('todoCtrl', function($scope, $http)
+        {
+            $scope.description ='';
+            $http.get('/api/items').then( function(res){
+                $scope.items = res.data;
+            });
+
+            $scope.remove = function(id){
+                $http.delete('/api/items/' + id).then(function(result){
+                    if(result)
+                    {
+                        $http.get('/api/items').then( function(res){
+                            $scope.items = res.data;    
+                        })
+                    }
+                }).catch(function(er) {
+                    
+                    console.log(er)
+                })
+            }
+
+            $scope.create = function(){
+                $http.post('/api/items', { description: $scope.description}).then(function(result){
+                    $scope.items.push(result.data)
+                }).catch(function(er) {
+                    console.log(er)
+                })
+                $scope.description =''
+            }
+           
+
+        });
+
+    </script>
+
+
+    
+</body>
+</html>
